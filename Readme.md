@@ -10,6 +10,11 @@ git clone https://github.com/Mayavan/blindspot_monitor.git
 * Tensorflow 2.0
 * Python 3.6
 
+## To label data
+```sh
+python3 labelData.py --file ../../video.mp4 --out ../data
+```
+
 ## To build the neural model
 
 Uncomment the models you want to build in src/createNeuralNetworkModel.py and run the file.
@@ -28,6 +33,9 @@ tensorboard --logdir ./logs/fit/
 ```
 
 ## To Convert trained Keras model to a frozen model
+```sh
+python3 freezeModel.py -m model_name.h5 --frozen model_name.pb
+```
 
 ## Docker to convert frozen graph to UFF for tensorRT
 
@@ -55,5 +63,5 @@ docker run --gpus all -it --rm -v "$PWD:/host" nvcr.io/nvidia/tensorrt:19.12-py3
 /opt/tensorrt/python/python_setup.sh
 
 # Convert frozen graph to uff
-convert-to-uff frozen_graph.pb -t -O Identity -o frozen_graph.uff
+convert-to-uff /host/frozen_models/model_name.pb -t -O Identity -o /host/frozen_models/model_name.uff
 ```
