@@ -25,6 +25,10 @@ The model will be created and saved in src/saved_models
 Uncomment the model you want to train in the file src/NeuralNetwork.py.
 The results will be plotted and saved in the result folder.
 
+```sh
+python3 trainNN.py --data /media/mayavan/NVME/Workspace/blindspot_detector_data/night_left_1
+```
+
 ![TensorBoard](images/tensorboard.png)
 
 ```sh
