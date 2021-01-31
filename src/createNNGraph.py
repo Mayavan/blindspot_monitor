@@ -11,10 +11,14 @@ from tensorflow.keras import backend as K
 from tensorflow.keras.regularizers import l2
 import tensorflow as tf
 import os
+import argparse
 
 weight_decay = 0.0005
 save_dir = os.path.join(os.getcwd(), '../keras_models')
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--model", help="Name of model to create.")
+args = parser.parse_args()
 
 class CreateNNGraph:
     def __init__(self, name):
@@ -24,7 +28,37 @@ class CreateNNGraph:
         elif name == "AlexNet.h5":
             model = self.createModel2()
         elif name == "VGG16.h5":
-            xception = tf.keras.applications.VGG16(
+            vgg16 = tf.keras.applications.VGG16(
+                include_top=True,
+                weights="imagenet",
+                input_tensor=None,
+                input_shape=None,
+                pooling=None,
+                classes=1000,
+            )
+            model = Sequential()
+            model.add(vgg16)
+            model.add(Dense(2))
+            model.add(Activation('softmax'))
+            model.compile(loss='binary_crossentropy', optimizer='adam',
+                            metrics=['accuracy'])
+        elif name == "inceptionv4.h5":
+            inceptionv4 = tf.keras.applications.InceptionResNetV2(
+                include_top=True,
+                weights="imagenet",
+                input_tensor=None,
+                input_shape=None,
+                pooling=None,
+                classes=1000,
+            )
+            model = Sequential()
+            model.add(inceptionv4)
+            model.add(Dense(2))
+            model.add(Activation('sigmoid'))
+            model.compile(loss='binary_crossentropy', optimizer='adam',
+                            metrics=['accuracy'])
+        elif name == "xception.h5":
+            xception = tf.keras.applications.Xception(
                 include_top=True,
                 weights="imagenet",
                 input_tensor=None,
@@ -35,8 +69,8 @@ class CreateNNGraph:
             model = Sequential()
             model.add(xception)
             model.add(Dense(2))
-            model.add(Activation('softmax'))
-            model.compile(loss='categorical_crossentropy', optimizer='adam',
+            model.add(Activation('sigmoid'))
+            model.compile(loss='binary_crossentropy', optimizer='adam',
                             metrics=['accuracy'])
         else:
             print("Build Failed")
@@ -157,10 +191,5 @@ class CreateNNGraph:
 
 
 if __name__ == "__main__":
-    # CreateNNGraph("wrn.h5")
-    # CreateNNGraph("ResNet56.h5")
-    # CreateNNGraph("LeNet.h5")
-    # CreateNNGraph("custom.h5")
-    CreateNNGraph("VGG16.h5")
-    #CreateNNGraph("AlexNet.h5")
+    CreateNNGraph(args.model)
 
