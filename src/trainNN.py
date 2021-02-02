@@ -3,6 +3,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.callbacks import Callback
 from matplotlib import pyplot
 import datetime
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -10,10 +11,11 @@ from tensorflow.keras import backend as K
 import tensorflow as tf
 import argparse
 import os
+import signal
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--data", help="Path of Video file to label")
-parser.add_argument("--model", help="Path to model")
+parser.add_argument("--model", help="Name of model in keras_models")
 args = parser.parse_args()
 
 model_dir = os.path.join(os.getcwd(), '../keras_models')
@@ -25,14 +27,41 @@ if not args.data:
 else:
     data_dir = args.data
 
-class NeuralNetwork:
+if not args.model:
+    args.model = 'inceptionv4.h5'
+
+
+class TerminateOnFlag(Callback):
     def __init__(self, name):
         self.name = name
+        self.terminate_flag = 0
+
+    """Callback that terminates training when flag=1 is encountered."""
+    def on_epoch_end(self, epoch, logs=None):
+        print("\nEpoch has ended")
+        print("\nTerminate flag = " + str(self.terminate_flag))
+        if self.terminate_flag:
+            print('\nStop training and save the model')
+            self.model.stop_training = True
+
+    def update_flag(self, val):
+        self.terminate_flag = val
+
+class NeuralNetwork:
+    # Monitors the SIGINT (ctrl + C) to safely stop training when it is sent
+    def handler(self, signum, frame):
+        print('\nSignal handler called with signal', signum)
+        self.terminate_on_flag.update_flag(1)
+
+
+    def __init__(self, name):
+        signal.signal(signal.SIGINT, self.handler)
+        self.name = name
         model_path = os.path.join(model_dir, name)
-        self.init_data_generator()
+        self.initDataGenerator()
         self.model = load_model(model_path)
 
-    def init_data_generator(self):
+    def initDataGenerator(self):
         # create a data generator
         datagen = ImageDataGenerator(rotation_range=5,
                                        width_shift_range=50.,
@@ -55,18 +84,17 @@ class NeuralNetwork:
 
         log_dir = logs_dir + "/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+        self.terminate_on_flag = TerminateOnFlag(self.name)
 
         history = self.model.fit(self.train_it,
                                 steps_per_epoch=20,
                                 validation_data=self.val_it,
                                 validation_steps=2,
                                 epochs=epochs,
-                                callbacks=[tensorboard_callback],
+                                callbacks=[tensorboard_callback, self.terminate_on_flag],
                                 verbose=1)
 
-        print("Saving Updated Model:")
-        model_path = os.path.join(model_dir, self.name)
-        self.model.save(model_path)
+        self.__saveModel()
 
         print("Saving training graphs:")
         try:
@@ -101,6 +129,11 @@ class NeuralNetwork:
         loss, acc = self.model.evaluate(self.x_test, self.y_test, verbose=1)
         print('\nTesting loss: {}, acc: {}\n'.format(loss, acc))
 
+    def __saveModel(self):
+        print("Saving Updated Model:")
+        model_path = os.path.join(model_dir, self.name)
+        self.model.save(model_path)
+
 
 
 
@@ -110,8 +143,8 @@ if __name__ == "__main__":
     # NeuralNetwork("LeNet.h5").trainModel(100, 500)
     # NeuralNetwork("custom.h5").trainModel(100, 500)
     #net = NeuralNetwork("AlexNet.h5")
-    net = NeuralNetwork("VGG16.h5")
-    net.trainModel(100, 100)
+    net = NeuralNetwork(args.model)
+    net.trainModel(2, 100)
 
     print("model.inputs : ", net.model.inputs)
     print("model.outputs : ", net.model.outputs)
