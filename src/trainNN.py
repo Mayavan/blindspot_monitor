@@ -4,7 +4,6 @@ from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.callbacks import Callback
-from matplotlib import pyplot
 import datetime
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import backend as K
@@ -95,34 +94,7 @@ class NeuralNetwork:
                                 verbose=1)
 
         self.__saveModel()
-
-        print("Saving training graphs:")
-        try:
-            if not os.path.exists(results_dir+self.name[0: -3]):
-                os.makedirs(results_dir+self.name[0: -3])
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-
-        # plot metrics
-        pyplot.title(''.join([self.name[0: -3], " with mini batch size of ", str(batch_size)]))
-        pyplot.xlabel('Epochs')
-        pyplot.ylabel('Loss')
-
-        pyplot.plot(history.history['val_loss'], label='Validation Loss')
-        pyplot.plot(history.history['loss'], label='Training Loss')
-        pyplot.legend()
-        pyplot.savefig(results_dir+self.name[0: -3]+'/loss.png')
-        pyplot.show()
-
-        pyplot.title(''.join([self.name[0: -3], " with mini batch size of ", str(batch_size)]))
-        pyplot.xlabel('Epochs')
-        pyplot.ylabel('Accuracy')
-        pyplot.plot(history.history['val_accuracy'], label='Validation Accuracy')
-        pyplot.plot(history.history['accuracy'], label='Training Accuracy')
-        pyplot.legend()
-        pyplot.savefig(results_dir+self.name[0: -3]+'/Accuracy.png')
-        pyplot.show()
+        tf.keras.backend.clear_session()
 
     # evaluate the model
     def testModel(self):
@@ -134,18 +106,6 @@ class NeuralNetwork:
         model_path = os.path.join(model_dir, self.name)
         self.model.save(model_path)
 
-
-
-
 if __name__ == "__main__":
-    # NeuralNetwork("ResNet56.h5").trainModel(100, 100)
-    # NeuralNetwork("wrn.h5").trainModel(50, 100)
-    # NeuralNetwork("LeNet.h5").trainModel(100, 500)
-    # NeuralNetwork("custom.h5").trainModel(100, 500)
-    #net = NeuralNetwork("AlexNet.h5")
     net = NeuralNetwork(args.model)
     net.trainModel(2, 100)
-
-    print("model.inputs : ", net.model.inputs)
-    print("model.outputs : ", net.model.outputs)
-    # NeuralNetwork("wrn.h5").testModel()
