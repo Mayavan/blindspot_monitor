@@ -40,8 +40,6 @@ class CreateNNGraph:
             model.add(vgg16)
             model.add(Dense(2))
             model.add(Activation('softmax'))
-            model.compile(loss='binary_crossentropy', optimizer='adam',
-                            metrics=['accuracy'])
         elif name == "inceptionv4.h5":
             inceptionv4 = tf.keras.applications.InceptionResNetV2(
                 include_top=True,
@@ -55,8 +53,6 @@ class CreateNNGraph:
             model.add(inceptionv4)
             model.add(Dense(2))
             model.add(Activation('sigmoid'))
-            model.compile(loss='binary_crossentropy', optimizer='adam',
-                            metrics=['accuracy'])
         elif name == "xception.h5":
             xception = tf.keras.applications.Xception(
                 include_top=True,
@@ -70,8 +66,6 @@ class CreateNNGraph:
             model.add(xception)
             model.add(Dense(2))
             model.add(Activation('sigmoid'))
-            model.compile(loss='binary_crossentropy', optimizer='adam',
-                            metrics=['accuracy'])
         else:
             print("Build Failed")
             return
@@ -119,7 +113,6 @@ class CreateNNGraph:
         model.add(Dense(10))
         model.add(Activation('softmax'))
 
-        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
         return model
 
 
@@ -184,9 +177,6 @@ class CreateNNGraph:
         model.add(Dense(2))
         model.add(Activation('softmax'))
 
-        # (4) Compile
-        model.compile(loss='categorical_crossentropy', optimizer='adam',
-                      metrics=['accuracy'])
         return model
 
 

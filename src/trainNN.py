@@ -1,18 +1,12 @@
 import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras.datasets import cifar10
-from tensorflow.keras.utils import to_categorical
-from tensorflow.keras.callbacks import TensorBoard
-from tensorflow.keras.callbacks import Callback
 import datetime
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras import backend as K
 import tensorflow as tf
 import argparse
 import os
 import signal
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--config", help="Path of json config file")
 parser.add_argument("--data", help="Path of Video file to label")
 parser.add_argument("--model", help="Name of model in keras_models")
 args = parser.parse_args()
@@ -20,6 +14,9 @@ args = parser.parse_args()
 model_dir = os.path.join(os.getcwd(), '../keras_models')
 logs_dir = os.path.join(os.getcwd(), '../logs')
 results_dir = os.path.join(os.getcwd(), '../results/')
+
+if args.config:
+    pass
 
 if not args.data:
     data_dir = '../data'
@@ -30,15 +27,15 @@ if not args.model:
     args.model = 'inceptionv4.h5'
 
 
-class TerminateOnFlag(Callback):
+class TerminateOnFlag(tf.keras.callbacks.Callback):
     def __init__(self, name):
         self.name = name
         self.terminate_flag = 0
 
     """Callback that terminates training when flag=1 is encountered."""
+
     def on_epoch_end(self, epoch, logs=None):
         print("\nEpoch has ended")
-        print("\nTerminate flag = " + str(self.terminate_flag))
         if self.terminate_flag:
             print('\nStop training and save the model')
             self.model.stop_training = True
@@ -46,52 +43,62 @@ class TerminateOnFlag(Callback):
     def update_flag(self, val):
         self.terminate_flag = val
 
+
 class NeuralNetwork:
     # Monitors the SIGINT (ctrl + C) to safely stop training when it is sent
     def handler(self, signum, frame):
         print('\nSignal handler called with signal', signum)
         self.terminate_on_flag.update_flag(1)
 
-
     def __init__(self, name):
         signal.signal(signal.SIGINT, self.handler)
         self.name = name
         model_path = os.path.join(model_dir, name)
         self.initDataGenerator()
-        self.model = load_model(model_path)
+        self.model = tf.keras.models.load_model(model_path)
+
+    def compileModel(self):
+        self.model.compile(loss='binary_crossentropy', optimizer='adam',
+                           metrics=['accuracy'])
 
     def initDataGenerator(self):
         # create a data generator
-        datagen = ImageDataGenerator(rotation_range=5,
-                                       width_shift_range=50.,
-                                       height_shift_range=50.,
-                                       rescale=1.0/255.0,
-                                       horizontal_flip=False)
+        datagen = tf.keras.preprocessing.image.ImageDataGenerator(rotation_range=5,
+                                                                  width_shift_range=50.,
+                                                                  height_shift_range=50.,
+                                                                  rescale=1.0/255.0,
+                                                                  horizontal_flip=False)
         # load and iterate training dataset
-        self.train_it = datagen.flow_from_directory(data_dir+'/train/', class_mode='categorical', batch_size=64, target_size=(224, 224))
+        self.train_it = datagen.flow_from_directory(
+            data_dir+'/train/', class_mode='categorical', batch_size=64, target_size=(224, 224))
         # load and iterate validation dataset
-        self.val_it = datagen.flow_from_directory(data_dir+'/val/', class_mode='categorical', batch_size=32, target_size=(224, 224))
+        self.val_it = datagen.flow_from_directory(
+            data_dir+'/val/', class_mode='categorical', batch_size=32, target_size=(224, 224))
         # load and iterate test dataset
-        self.test_it = datagen.flow_from_directory(data_dir+'/test/', class_mode='categorical', batch_size=32, target_size=(224, 224))
+        self.test_it = datagen.flow_from_directory(
+            data_dir+'/test/', class_mode='categorical', batch_size=32, target_size=(224, 224))
 
     # Fit the model
     def trainModel(self, epochs, batch_size):
+        tf.keras.backend.clear_session()
         config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
         session = tf.compat.v1.InteractiveSession(config=config)
         tf.compat.v1.keras.backend.set_session(session)
 
         log_dir = logs_dir + "/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(
+            log_dir=log_dir, histogram_freq=1)
         self.terminate_on_flag = TerminateOnFlag(self.name)
 
         history = self.model.fit(self.train_it,
-                                steps_per_epoch=20,
-                                validation_data=self.val_it,
-                                validation_steps=2,
-                                epochs=epochs,
-                                callbacks=[tensorboard_callback, self.terminate_on_flag],
-                                verbose=1)
+                                 steps_per_epoch=20,
+                                 validation_data=self.val_it,
+                                 validation_steps=2,
+                                 epochs=epochs,
+                                 callbacks=[tensorboard_callback,
+                                            self.terminate_on_flag],
+                                 verbose=1)
 
         self.__saveModel()
         tf.keras.backend.clear_session()
@@ -106,6 +113,8 @@ class NeuralNetwork:
         model_path = os.path.join(model_dir, self.name)
         self.model.save(model_path)
 
+
 if __name__ == "__main__":
     net = NeuralNetwork(args.model)
+    net.compileModel()
     net.trainModel(2, 100)

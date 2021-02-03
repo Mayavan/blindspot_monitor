@@ -17,16 +17,15 @@ python3 labelData.py --file ../../video.mp4 --out ../data
 
 ## To build the neural model
 
-Uncomment the models you want to build in src/createNeuralNetworkModel.py and run the file.
+```sh
+python3 createNNGraph.py --model inceptionv4.h5
+```
 The model will be created and saved in src/saved_models
 
 ## To train the neural model
 
-Uncomment the model you want to train in the file src/NeuralNetwork.py.
-The results will be plotted and saved in the result folder.
-
 ```sh
-python3 trainNN.py --data /media/mayavan/NVME/Workspace/blindspot_detector_data/night_left_1
+python3 trainNN.py --data /media/mayavan/NVME/Workspace/blindspot_detector_data/night_left_1 --model inceptionv4.h5
 ```
 
 ![TensorBoard](images/tensorboard.png)
