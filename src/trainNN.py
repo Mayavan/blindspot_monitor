@@ -3,6 +3,7 @@ import datetime
 import tensorflow as tf
 import os
 import signal
+import json
 
 
 class TerminateOnFlag(tf.keras.callbacks.Callback):
@@ -87,13 +88,15 @@ class NeuralNetwork:
 
     def __saveModel(self):
         print("Saving Updated Model:")
-        model_path = os.path.join(model_dir, self.config["model"])
+        model_path = os.path.join(
+            model_dir, self.config["model"][:-3] + datetime.datetime.now().strftime("_%d_%m_%Y_%H_%M_%S") + ".h5")
         self.model.save(model_path)
+        with open(model_path[:-2] + "json", "+w") as outfile:
+            json.dump(config, outfile)
 
 
 if __name__ == "__main__":
     import argparse
-    import json
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="Path of json config file")
     parser.add_argument("--data", help="Path of Video file to label")
