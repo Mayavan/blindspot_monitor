@@ -26,6 +26,8 @@ The model will be created and saved in src/saved_models
 
 ```sh
 python3 trainNN.py --data /media/mayavan/NVME/Workspace/blindspot_detector_data/night_left_1 --model inceptionv4.h5
+# or
+python3 trainNN.py --config ../config.json
 ```
 
 ![TensorBoard](images/tensorboard.png)
