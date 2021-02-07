@@ -1,6 +1,6 @@
 {
     "data": "/media/mayavan/NVME/Workspace/blindspot_detector_data/night_left_1",
-    "model": "inceptionv4.h5",
-    "epochs": 2,
+    "model": "inceptionv4_03_02_2021_19_49_05.h5",
+    "epochs": 100,
     "batch_size": 100
 }

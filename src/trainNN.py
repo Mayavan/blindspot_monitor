@@ -5,6 +5,9 @@ import os
 import signal
 import json
 
+model_dir = os.path.join(os.getcwd(), '../keras_models')
+logs_dir = os.path.join(os.getcwd(), '../logs')
+
 
 class TerminateOnFlag(tf.keras.callbacks.Callback):
     def __init__(self):
@@ -45,7 +48,8 @@ class NeuralNetwork:
                                                                   width_shift_range=50.,
                                                                   height_shift_range=50.,
                                                                   rescale=1.0/255.0,
-                                                                  horizontal_flip=False)
+                                                                  horizontal_flip=False,
+                                                                  preprocessing_function=tf.keras.applications.inception_resnet_v2.preprocess_input)
         # load and iterate training dataset
         self.train_it = datagen.flow_from_directory(
             self.config["data"]+'/train/', class_mode='categorical', batch_size=64, target_size=(224, 224))
@@ -58,7 +62,6 @@ class NeuralNetwork:
 
     # Fit the model
     def trainModel(self):
-        tf.keras.backend.clear_session()
         config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
         session = tf.compat.v1.InteractiveSession(config=config)
@@ -83,7 +86,7 @@ class NeuralNetwork:
 
     # evaluate the model
     def testModel(self):
-        loss, acc = self.model.evaluate(self.x_test, self.y_test, verbose=1)
+        loss, acc = self.model.evaluate(self.test_it, verbose=1)
         print('\nTesting loss: {}, acc: {}\n'.format(loss, acc))
 
     def __saveModel(self):
@@ -92,7 +95,7 @@ class NeuralNetwork:
             model_dir, self.config["model"][:-3] + datetime.datetime.now().strftime("_%d_%m_%Y_%H_%M_%S") + ".h5")
         self.model.save(model_path)
         with open(model_path[:-2] + "json", "+w") as outfile:
-            json.dump(config, outfile)
+            json.dump(self.config, outfile)
 
 
 if __name__ == "__main__":
@@ -102,10 +105,6 @@ if __name__ == "__main__":
     parser.add_argument("--data", help="Path of Video file to label")
     parser.add_argument("--model", help="Name of model in keras_models")
     args = parser.parse_args()
-
-    model_dir = os.path.join(os.getcwd(), '../keras_models')
-    logs_dir = os.path.join(os.getcwd(), '../logs')
-    results_dir = os.path.join(os.getcwd(), '../results/')
 
     config = {}
 

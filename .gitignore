@@ -3,3 +3,4 @@ logs/
 results/
 frozen_models/
 data*
+src/__pycache__/
