@@ -1,6 +1,12 @@
 {
-    "data": "/media/mayavan/NVME/Workspace/blindspot_detector_data/night_left_1",
-    "model": "inceptionv4_03_02_2021_19_49_05.h5",
+    "data": "/home/mayavan/Blind Spot Monitor/blindspot_detector_data/night_left_1",
+    "model": "custom.h5",
     "epochs": 100,
-    "batch_size": 100
+    "batch_size": 100,
+    "optimizer": {
+        "learning_rate": 0.001,
+        "beta_1": 0.9,
+        "beta_2": 0.999,
+        "epsilon": 1e-07
+    }
 }

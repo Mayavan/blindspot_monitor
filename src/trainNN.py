@@ -39,26 +39,31 @@ class NeuralNetwork:
         self.model = tf.keras.models.load_model(model_path)
 
     def compileModel(self):
-        self.model.compile(loss='binary_crossentropy', optimizer='adam',
+        adam = tf.keras.optimizers.Adam(
+            learning_rate=self.config["optimizer"]["learning_rate"],
+            beta_1=self.config["optimizer"]["beta_1"],
+            beta_2=self.config["optimizer"]["beta_2"],
+            epsilon=self.config["optimizer"]["epsilon"], amsgrad=False
+        )
+        self.model.compile(loss='binary_crossentropy', optimizer=adam,
                            metrics=['accuracy'])
 
     def initDataGenerator(self):
         # create a data generator
-        datagen = tf.keras.preprocessing.image.ImageDataGenerator(rotation_range=5,
-                                                                  width_shift_range=50.,
-                                                                  height_shift_range=50.,
+        datagen = tf.keras.preprocessing.image.ImageDataGenerator(rotation_range=3,
+                                                                  width_shift_range=10.,
+                                                                  height_shift_range=10.,
                                                                   rescale=1.0/255.0,
-                                                                  horizontal_flip=False,
-                                                                  preprocessing_function=tf.keras.applications.inception_resnet_v2.preprocess_input)
+                                                                  horizontal_flip=True)
         # load and iterate training dataset
         self.train_it = datagen.flow_from_directory(
-            self.config["data"]+'/train/', class_mode='categorical', batch_size=64, target_size=(224, 224))
+            self.config["data"]+'/train/', class_mode='categorical', batch_size=64, target_size=(128, 128))
         # load and iterate validation dataset
         self.val_it = datagen.flow_from_directory(
-            self.config["data"]+'/val/', class_mode='categorical', batch_size=32, target_size=(224, 224))
+            self.config["data"]+'/val/', class_mode='categorical', batch_size=64, target_size=(128, 128))
         # load and iterate test dataset
         self.test_it = datagen.flow_from_directory(
-            self.config["data"]+'/test/', class_mode='categorical', batch_size=32, target_size=(224, 224))
+            self.config["data"]+'/test/', class_mode='categorical', batch_size=64, target_size=(128, 128))
 
     # Fit the model
     def trainModel(self):
@@ -75,7 +80,7 @@ class NeuralNetwork:
         history = self.model.fit(self.train_it,
                                  steps_per_epoch=20,
                                  validation_data=self.val_it,
-                                 validation_steps=2,
+                                 validation_steps=3,
                                  epochs=self.config["epochs"],
                                  callbacks=[tensorboard_callback,
                                             self.terminate_on_flag],
