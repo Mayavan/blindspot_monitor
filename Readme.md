@@ -1,4 +1,4 @@
-# CIFAR10 with LeNet5, AlexNet, Wide Residual Network in Keras
+# Blind spot monitor
 
 ## Clone this project to your computer:
 
