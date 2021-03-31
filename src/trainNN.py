@@ -5,8 +5,8 @@ import os
 import signal
 import json
 
-model_dir = os.path.join(os.getcwd(), '../keras_models')
-logs_dir = os.path.join(os.getcwd(), '../logs')
+model_dir = os.path.join(os.getcwd(), './keras_models')
+logs_dir = os.path.join(os.getcwd(), './logs')
 
 
 class TerminateOnFlag(tf.keras.callbacks.Callback):

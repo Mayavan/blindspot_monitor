@@ -1,5 +1,5 @@
 {
-    "data": "/home/mayavan/Blind Spot Monitor/blindspot_detector_data/night_left_1",
+    "data": "/home/mayavan/python_projects/BlindSpotMonitor/blindspot_detector_data/night_left_1",
     "model": "custom.h5",
     "epochs": 100,
     "batch_size": 100,

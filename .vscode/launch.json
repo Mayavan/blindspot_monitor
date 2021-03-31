@@ -1,0 +1,48 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "train",
+            "type": "python",
+            "request": "launch",
+            "program": "src/trainNN.py",
+            "args": [
+                "--config",
+                "./config.json"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "dump",
+            "type": "python",
+            "request": "launch",
+            "program": "src/dumpPreProcessedData.py",
+            "args": [
+                "--config",
+                "./config.json"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "predict",
+            "type": "python",
+            "request": "launch",
+            "program": "src/predictImage.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "tensorboard",
+            "type": "python",
+            "request": "launch",
+            "module": "tensorboard.main",
+            "args": [
+                "--logdir",
+                "./logs/fit/"
+            ],
+            "console": "integratedTerminal"
+        }
+    ]
+}
